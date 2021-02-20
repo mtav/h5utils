@@ -209,7 +209,7 @@ def h5_setupLattice(HDF5_file_object, total_lattice_size=None, requested_dataset
   description = None
   if 'description' in HDF5_file_object.keys():
     #description              Dataset {SCALAR}
-    description = HDF5_file_object['description'][...].tostring().decode("ascii").strip('\0')
+    description = HDF5_file_object['description'][...].tobytes().decode("ascii").strip('\0')
     print('description = {}'.format(description))
 
   complete_dataset_list = h5_getDataSets(HDF5_file_object)
