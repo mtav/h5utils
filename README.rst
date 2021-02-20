@@ -12,3 +12,25 @@ They include:
   
 .. _MPB: https://mpb.readthedocs.io/
 .. _HDF5: https://www.hdfgroup.org/solutions/hdf5/
+
+Installation:
+-------------
+.. code:: bash
+
+	pip install h5utils
+
+Usage:
+------
+To convert an .h5 files to .vts, simply run:
+
+.. code:: bash
+
+    h5tovts example.h5
+
+For more help:
+
+.. code:: bash
+
+    h5tovts --help
+    
+   

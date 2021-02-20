@@ -35,7 +35,7 @@ setuptools.setup(
     description="Utilities to work with HDF5 files. Notably includes h5tovts, which converts HDF5 files to structured VTK files for visualization with VTK-aware programs.",
     long_description=long_description,
     long_description_content_type="text/x-rst",
-    url="https://mtav.github.io/script_inception_public",
+    url="https://github.com/mtav/h5utils",
     packages=packages,
     classifiers=[
         "Programming Language :: Python :: 3",
