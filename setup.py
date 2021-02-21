@@ -11,7 +11,7 @@ with open("README.rst", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name=NAME,
-    version="0.0.3",
+    version="0.0.4",
     author="Mike Taverne",
     author_email="Mike.Taverne@bristol.ac.uk",
     description='''Utilities to work with HDF5 files.
