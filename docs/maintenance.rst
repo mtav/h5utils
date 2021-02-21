@@ -7,7 +7,7 @@ Releasing a new version:
 
 .. code:: bash
 
-	./packaging/release.sh
+	bash ./packaging/release.sh
 
 Documentation update:
 =====================
@@ -31,7 +31,7 @@ Or for convenience:
 
 .. code:: bash
 
-        ./packaging/update_docs.sh
+        bash ./packaging/update_docs.sh
 
 Configuration files of interest:
 ================================
