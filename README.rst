@@ -36,5 +36,3 @@ For more help:
 .. code:: bash
 
     h5tovts --help
-    
-   
