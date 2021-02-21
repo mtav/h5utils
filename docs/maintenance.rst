@@ -1,5 +1,5 @@
 ================
-Maintenance info
+Maintainer infos
 ================
 
 Releasing a new version:
@@ -27,6 +27,12 @@ If you want to generate it locally, run one of the make commands in docs/ as fol
         # make documentation with and without todo notes
         make all
 
+Or for convenience:
+
+.. code:: bash
+
+        ./packaging/update_docs.sh
+
 Configuration files of interest:
 ================================
 
@@ -35,3 +41,4 @@ Configuration files of interest:
 * *tox.ini* : for testing with tox
 * *.bumpversion.cfg* : bumpversion configuration
 * *.pylintrc* : pylint configuration
+* *~/.pypirc* : credentials to upload to PyPi
