@@ -3,6 +3,8 @@ h5utils Package
 
 **h5utils** is a python package adding extra functionality missing from `MIT's h5 utilities <MITH5TOOLS>`_.
     
+NanoComp/h5utils
+    
 HDF5_ (Hierarchical Data Format 5) is a file format for storing scientific data.
 
 The tools in the h5utils package allow converting other formats from and to HDF5 and to visualize HDF5 files.
