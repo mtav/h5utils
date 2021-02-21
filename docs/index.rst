@@ -3,14 +3,42 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to h5utils's documentation!
-===================================
+=======================
+h5utils: HDF5 utilities
+=======================
+
+.. include:: ../README.rst
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :hidden:
+    :glob:
+    
+    installation
+    usage
+    tutorial
+    Source documentation <source/modules>
+    maintenance
+
+..     *
+
+.. ===================================
+
+.. Contents:
+
+.. .. toctree::
+..    :maxdepth: 2
+..    :caption: Contents:
+   
+   
 
 
+.. h5utils
+.. ----------------------------------------
+.. 
+.. .. automodule:: h5utils.h5utils
+..     :members:
+..     :undoc-members:
+..     :show-inheritance:
 
 Indices and tables
 ==================
