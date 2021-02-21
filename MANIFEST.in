@@ -1,3 +1,4 @@
 include README.rst
 include requirements.txt
 include h5utils/data/*.h5
+include h5utils/data/*.ctl
