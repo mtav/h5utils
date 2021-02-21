@@ -60,6 +60,7 @@ class Lattice(object):
   .. todo:: merge somehow with BFDTD meshing classes? (need proper definition for resolution, etc)
   '''
   def __init__(self):
+    '''Constructor'''
     self.basis1 = array([1,0,0])
     self.basis2 = array([0,1,0])
     self.basis3 = array([0,0,1])
@@ -74,6 +75,7 @@ class Lattice(object):
     return
 
   def __str__(self):
+    '''str constructor, used to print the object instance.'''
     ret = 'lattice:\n'
     ret += '  basis1 = {}\n'.format(self.basis1)
     ret += '  basis2 = {}\n'.format(self.basis2)
@@ -83,12 +85,14 @@ class Lattice(object):
     return(ret)
 
   def getLatticeVectors(self):
+    '''Return lattice vectors'''
     a1 = self.size[0]*self.basis_size[0]*self.basis1/norm(self.basis1)
     a2 = self.size[1]*self.basis_size[1]*self.basis2/norm(self.basis2)
     a3 = self.size[2]*self.basis_size[2]*self.basis3/norm(self.basis3)
     return (a1, a2, a3)
 
   def getBounds(self):
+    '''Return (xmin,xmax, ymin,ymax, zmin,zmax) bounds of the lattice.'''
     (a1, a2, a3) = self.getLatticeVectors()
 
     Pmax = 0.5*a1 + 0.5*a2 + 0.5*a3
@@ -120,6 +124,7 @@ class Lattice(object):
     return (dx,dy,dz)
 
   def getResolution(self):
+    '''Return resolution.'''
     return [len(self.xmesh), len(self.ymesh), len(self.zmesh)]
 
   def getSpacing(self):
@@ -400,7 +405,7 @@ def MPB_h5tovts(h5file, basepath, total_lattice_size=None, requested_dataset=[],
 def BFDTD_h5_to_vts(h5file, basepath, total_lattice_size=None, requested_dataset=[], verbosity=0, x_relative_range=[0,1], y_relative_range=[0,1], z_relative_range=[0,1], real_units=False, dry_run=False):
   '''
     Converts BFDTD h5 files to VTS files.
-    .. todo:: need py2-compatible bfdtd-parser for direct creation
+        
     .. todo:: when selecting a smaller mesh region for speed, we also need to change the size of the VTS grid (but keep coords correct)...
   '''
 
@@ -636,7 +641,42 @@ def setTupleComplex(offset, value, A_re_array, A_im_array, A_mod_array, A_phase_
   return(A_mod)
 
 def createvtkArray(name, number_of_tuples, component_names):
-  ''' ..todo:: Check if vtkScalarArray does not already allow this... '''
+  '''
+  vtkScalarArray constructor wrapper.
+  
+  It creates a vtkScalarArray named **name**, with **number_of_tuples** tuples and the given component names **component_names**.
+  The returned array is filled with zeros.
+  
+  Example usage::
+  
+    >>> import h5utils.h5utils as h
+    >>> A=h.createvtkArray('myname', 4, ['Ex', 'Ey', 'value_of_interest'])
+    >>> print(A)
+    vtkFloatArray (0x238d300)
+      Debug: Off
+      Modified Time: 68
+      Reference Count: 1
+      Registered Events: (none)
+      Name: myname
+      Data type: float
+      Size: 12
+      MaxId: 11
+      NumberOfComponents: 3
+      ComponentNames: 
+        0 : 0x2d7ed00
+        1 : 0x2d7b510
+        2 : 0x2d7ed50
+      Information: 0
+      Name: myname
+      Number Of Components: 3
+      Number Of Tuples: 4
+      Size: 12
+      MaxId: 11
+      LookupTable: (none)
+  
+  
+  .. todo:: Check if vtkScalarArray does not already allow this...
+  '''
   A = vtkScalarArray()
   A.SetName(name)
   A.SetNumberOfComponents(len(component_names))
@@ -647,6 +687,15 @@ def createvtkArray(name, number_of_tuples, component_names):
   return A
 
 def createComplexArrays(name, number_of_tuples):
+  '''
+  Creates and returns 4 vtkScalarArray arrays, named *(name+'_re', name+'_im', name+'_mod', name+'_phase')*, with *number_of_tuples* tuples in each.
+  The returned arrays are meant to represent the real, imaginary, modulus and phase values of a given complex field.
+  
+
+  :param str name: Base name to use for the generated arrays. Example: name='E' -> 'E_re', 'E_im', 'E_mod', 'E_phase'
+  :param int number_of_tuples: number of tuples
+  :return: (A_re, A_im, A_mod, A_phase)  
+  '''
   #A_re = createvtkArray(name+'_re', number_of_tuples, (name+'_re_x', name+'_re_y', name+'_re_z'))
   #A_im = createvtkArray(name+'_im', number_of_tuples, (name+'_im_x', name+'_im_y', name+'_im_z'))
   #A_mod = createvtkArray(name+'_mod', number_of_tuples, (name+'_mod_x', name+'_mod_y', name+'_mod_z'))
@@ -658,6 +707,11 @@ def createComplexArrays(name, number_of_tuples):
   return (A_re, A_im, A_mod, A_phase)
 
 def stltoh5(stlfile, basepath, epsilon_inside, epsilon_outside, lattice=Lattice(), verbosity=0):
+  '''
+  Converts an STL file into an HDF5 file.
+  
+  It creates an array based on **lattice** and fills it with **epsilon_inside** for points inside the geometry defined by the STL file and with **epsilon_outside** for points outside of it.
+  '''
 
   if not os.path.exists(stlfile):
     if sys.version_info.major == 2:
