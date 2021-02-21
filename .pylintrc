@@ -1,9 +1,12 @@
-#[MASTER]
-#disable=
+[MASTER]
+disable=
+  invalid-name,
+  global-at-module-level,
+  line-too-long,
+#    redefined-builtin,
 #    bad-indentation,
 #    missing-function-docstring,
 #    invalid-name,
 #    missing-module-docstring,
 #    missing-function-docstring,
 #    global-at-module-level,
-#    redefined-builtin,
