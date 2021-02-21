@@ -1,0 +1,9 @@
+#[MASTER]
+#disable=
+#    bad-indentation,
+#    missing-function-docstring,
+#    invalid-name,
+#    missing-module-docstring,
+#    missing-function-docstring,
+#    global-at-module-level,
+#    redefined-builtin,
