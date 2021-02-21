@@ -1,7 +1,7 @@
 h5utils Package
 ===============
 
-*h5utils* is a python package adding extra functionality missing from `MIT's h5utils <https://github.com/NanoComp/h5utils>`_.
+**h5utils** is a python package adding extra functionality missing from `MIT's h5utils <MITH5TOOLS>`_.
 
 HDF5_ (Hierarchical Data Format 5) is a file format for storing scientific data.
 
@@ -14,6 +14,7 @@ They include:
 
 .. _MPB: https://mpb.readthedocs.io/
 .. _HDF5: https://www.hdfgroup.org/solutions/hdf5/
+.. _MITH5TOOLS: https://github.com/NanoComp/h5utils
 
 For more documentation, please see https://h5utils.readthedocs.io.
 
