@@ -13,6 +13,8 @@ They include:
 .. _MPB: https://mpb.readthedocs.io/
 .. _HDF5: https://www.hdfgroup.org/solutions/hdf5/
 
+For more documentation, please see https://h5utils.readthedocs.io.
+
 Installation:
 -------------
 .. code:: bash

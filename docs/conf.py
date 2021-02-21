@@ -66,6 +66,13 @@ html_sidebars = {
         #"donate.html",
     ]
 }
+html_theme_options = {
+    "description": "HDF5 utilities",
+    "github_user": "mtav",
+    "github_repo": "h5utils",
+    "fixed_sidebar": True,
+    #"tidelift_url": "https://tidelift.com/subscription/pkg/pypi-alabaster?utm_source=pypi-alabaster&utm_medium=referral&utm_campaign=docs",  # noqa
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
