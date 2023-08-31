@@ -39,3 +39,12 @@ For more help:
 .. code:: bash
 
     h5tovts --help
+
+Development setup:
+------------------
+
+.. code:: bash
+
+    git clone https://github.com/mtav/h5utils.git
+    cd h5utils
+    pipx install --editable .
