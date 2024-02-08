@@ -18,6 +18,7 @@ h5utils: HDF5 utilities
     tutorial
     Source documentation <source/modules>
     maintenance
+    Known issues <known_issues>
 
 ..     *
 
