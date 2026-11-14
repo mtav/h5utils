@@ -9,8 +9,8 @@ echo "==> PKGDIR: ${PKGDIR}"
 
 # build package
 cd ${PKGDIR}
-NAME=$(python3 setup.py --name)
-CURRENT_VERSION=$(python3 setup.py --version)
+NAME=$(grep -m1 '^name' pyproject.toml | cut -d'"' -f2)
+CURRENT_VERSION=$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)
 python3 -m build
 
 # cd into testdir

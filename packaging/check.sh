@@ -9,12 +9,12 @@ echo "ORIGDIR: ${ORIGDIR}"
 cd ${ORIGDIR}
 echo "==> pwd: $(pwd)"
 
-NAME=$(python3 setup.py --name)
-CURRENT_VERSION=$(python3 setup.py --version)
+NAME=$(grep -m1 '^name' pyproject.toml | cut -d'"' -f2)
+CURRENT_VERSION=$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)
 
 VENVDIR=/tmp/testdir/testenv
 
-python3 setup.py sdist bdist_wheel
+python3 -m build
 # source testenv/bin/activate
 source ${VENVDIR}/bin/activate
 unset PYTHONPATH PYTHONSTARTUP

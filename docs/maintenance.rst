@@ -36,7 +36,7 @@ Or for convenience:
 Configuration files of interest:
 ================================
 
-* *setup.py* : setuptools configuration
+* *pyproject.toml* : packaging (setuptools) configuration and version
 * *./docs/conf.py* : sphinx configuration
 * *tox.ini* : for testing with tox
 * *.bumpversion.cfg* : bumpversion configuration

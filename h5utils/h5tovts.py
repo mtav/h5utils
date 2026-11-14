@@ -4,7 +4,7 @@
 '''
 Module providing the h5tovts function.
 
-It can be used as is or via the console entry point in setup.py.
+It can be used as is or via the console entry point defined in pyproject.toml.
 
 It works with vtk 6.1.0, i.e. the python-vtk6 package on Debian-based distros.
 
@@ -124,7 +124,7 @@ def h5tovts(arguments):
                             arguments.verbosity)
 
 def main():
-    '''main function, used as console entry point in setup.py'''
+    '''main function, used as console entry point in pyproject.toml'''
     return h5tovts(h5tovts_parse_args(sys.argv[1:]))
 
 if __name__ == '__main__':

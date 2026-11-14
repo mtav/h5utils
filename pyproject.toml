@@ -1,6 +1,38 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
-]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "h5utils"
+version = "0.0.4"
+description = "Utilities to work with HDF5 files. Notably includes h5tovts, which converts HDF5 files to structured VTK files for visualization with VTK-aware programs."
+readme = "README.rst"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.6"
+authors = [
+    { name = "Mike Taverne", email = "Mike.Taverne@bristol.ac.uk" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy",
+    "vtk",
+    "h5py",
+]
+
+[project.urls]
+Homepage = "https://github.com/mtav/h5utils"
+
+[project.scripts]
+h5tovts = "h5utils.h5tovts:main"
+
+[tool.setuptools.packages.find]
+include = ["h5utils*"]
+namespaces = false
+
+# Data files (h5utils/data/*) are selected by MANIFEST.in.
+[tool.setuptools]
+include-package-data = true

@@ -6,14 +6,13 @@ cd $(dirname ${0})/..
 echo "==> pwd: $(pwd)"
 
 # build and upload to test pypi
-#CURRENT_VERSION=$(grep version setup.py | awk -F'"' '{print $2}')
-CURRENT_VERSION=$(python3 setup.py --version)
-NAME=$(python3 setup.py --name)
+CURRENT_VERSION=$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)
+NAME=$(grep -m1 '^name' pyproject.toml | cut -d'"' -f2)
 echo "==> CURRENT_VERSION=${CURRENT_VERSION}"
-# bumpversion --current-version ${CURRENT_VERSION} patch setup.py
-python3 setup.py clean --all
+# bumpversion --current-version ${CURRENT_VERSION} patch pyproject.toml
+rm -rf build
 # rm -iv dist/*
-python3 setup.py sdist bdist_wheel
+python3 -m build
 # python3 -m twine upload --repository testpypi dist/*
 
 # check requirements
