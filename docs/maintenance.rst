@@ -2,6 +2,13 @@
 Maintainer infos
 ================
 
+Packages to install for maintainance/development
+================================================
+* bumpversion
+* tox
+* ruff
+* pylint
+
 Releasing a new version:
 ========================
 
@@ -42,3 +49,32 @@ Configuration files of interest:
 * *.bumpversion.cfg* : bumpversion configuration
 * *.pylintrc* : pylint configuration
 * *~/.pypirc* : credentials to upload to PyPi
+
+Running tests, linting and code formatting
+==========================================
+
+.. code:: bash
+
+        # Directly, with unittest
+        python3 -m unittest discover -s tests -v
+        # With pytest
+        pip install pytest
+        pytest tests -v
+        # With tox
+        tox                  # all environments
+        tox -e 3.12          # one Python version
+        tox -e lint          # ruff only
+        tox -e 3.12 -- -k test_2D_conversion -v   # pass pytest options after --
+        # Linting and code formatting
+        ruff check
+        pylint ./h5utils/
+
+TODO
+====
+* Fix pylint and ruff warnings.
+* Document and test/fix scripts in packaging/
+* Fix tox run.
+* Test and document 2D support.
+* Update docs and make new relase with 2D support.
+* Add array creation. (like mpb-data -x -y -z)
+* Add rectangular cell output. (like mpb-data -r)
