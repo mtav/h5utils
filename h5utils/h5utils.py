@@ -397,6 +397,11 @@ def MPB_h5tovts(h5file, basepath, total_lattice_size=None, requested_dataset=[],
       dataset_vts.GetPointData().AddArray(dataset_dict[key][1])
       dataset_vti.GetPointData().AddArray(dataset_dict[key][1])
 
+    # Set active scalars:
+    # A VTK grid can hold many named arrays, such as epsilon.xx and data.
+    # The active scalar array is the one that viewers like ParaView colour by default when you open the file,
+    # and that filters such as contour or threshold pick up without being told which array to use.
+    # It only changes a default, and all the arrays are still written to the file.
     active_scalars = 'data' if 'data' in dataset_dict else next(iter(dataset_dict), None)
     if active_scalars is not None:
       dataset_vts.GetPointData().SetActiveScalars(active_scalars)
