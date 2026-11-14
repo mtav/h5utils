@@ -95,7 +95,12 @@ class Lattice(object):
     '''Return (xmin,xmax, ymin,ymax, zmin,zmax) bounds of the lattice.'''
     (a1, a2, a3) = self.getLatticeVectors()
 
-    Pmax = 0.5*a1 + 0.5*a2 + 0.5*a3
+    # Axes with a single mesh point (e.g. 2D data) have no extent: the data lies in the plane through the centre.
+    (Nx, Ny, Nz) = self.getResolution()
+    fx = 0.5 if Nx > 1 else 0
+    fy = 0.5 if Ny > 1 else 0
+    fz = 0.5 if Nz > 1 else 0
+    Pmax = fx*a1 + fy*a2 + fz*a3
     Pmin = -Pmax
 
     xmin = Pmin[0]
@@ -130,18 +135,20 @@ class Lattice(object):
   def getSpacing(self):
     (xmin,xmax, ymin,ymax, zmin,zmax) = self.getBounds()
     (Nx, Ny, Nz) = self.getResolution()
-    dx = (xmax-xmin)/(Nx-1)
-    dy = (ymax-ymin)/(Ny-1)
-    dz = (zmax-zmin)/(Nz-1)
+    # A single-point axis (2D data) has no meaningful spacing, so use 1 (VTK requires a non-zero value).
+    dx = (xmax-xmin)/(Nx-1) if Nx > 1 else 1.0
+    dy = (ymax-ymin)/(Ny-1) if Ny > 1 else 1.0
+    dz = (zmax-zmin)/(Nz-1) if Nz > 1 else 1.0
     return (dx,dy,dz)
 
   def setResolution(self, Nx, Ny, Nz):
     '''
     Sets up homogeneous X,Y,Z grids with Nx,Ny,Nz points.
     '''
-    self.xmesh = linspace(-0.5, 0.5, Nx)
-    self.ymesh = linspace(-0.5, 0.5, Ny)
-    self.zmesh = linspace(-0.5, 0.5, Nz)
+    # A single point (e.g. the z axis of 2D data) is placed at the centre of the cell.
+    self.xmesh = linspace(-0.5, 0.5, Nx) if Nx > 1 else array([0.0])
+    self.ymesh = linspace(-0.5, 0.5, Ny) if Ny > 1 else array([0.0])
+    self.zmesh = linspace(-0.5, 0.5, Nz) if Nz > 1 else array([0.0])
     return
 
   def getMesh(self):
@@ -233,9 +240,14 @@ def h5_setupLattice(HDF5_file_object, total_lattice_size=None, requested_dataset
   # TODO: Might cause conflict with size read from x/y/z mesh values... Add warnings?
   print('Using dataset = {} to determine dimensions.'.format(selected_dataset))
   data = HDF5_file_object[selected_dataset]
-  if len(data.shape) != 3:
-    raise Exception('Data of dimension {}. Only 3D data supported at the moment.'.format(len(data.shape)))
-  (Nx, Ny, Nz) = data.shape
+  if len(data.shape) == 3:
+    (Nx, Ny, Nz) = data.shape
+  elif len(data.shape) == 2:
+    # 2D data is handled as a 3D grid with a single layer along z, i.e. shape (Nx, Ny, 1).
+    (Nx, Ny) = data.shape
+    Nz = 1
+  else:
+    raise Exception('Data of dimension {}. Only 2D and 3D data supported at the moment.'.format(len(data.shape)))
 
   # set up lattice
   mylattice = Lattice()
@@ -385,8 +397,10 @@ def MPB_h5tovts(h5file, basepath, total_lattice_size=None, requested_dataset=[],
       dataset_vts.GetPointData().AddArray(dataset_dict[key][1])
       dataset_vti.GetPointData().AddArray(dataset_dict[key][1])
 
-    dataset_vts.GetPointData().SetActiveScalars('data')
-    dataset_vti.GetPointData().SetActiveScalars('data')
+    active_scalars = 'data' if 'data' in dataset_dict else next(iter(dataset_dict), None)
+    if active_scalars is not None:
+      dataset_vts.GetPointData().SetActiveScalars(active_scalars)
+      dataset_vti.GetPointData().SetActiveScalars(active_scalars)
 
     # write out .vts file
     writer = vtk.vtkXMLStructuredGridWriter()
