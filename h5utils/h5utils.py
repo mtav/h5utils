@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 '''
 This module provides various utilities to work with the HDF5 format (and the VTK formats).
@@ -14,24 +13,24 @@ This script only runs with python2 because the python VTK module is not yet full
 .. todo:: Read in multiple separate STL files.
 '''
 
-from __future__ import division
 
 import os
-import sys
-import vtk
-import h5py
 import time
+
+import h5py
 import numpy
-from numpy import array, zeros, sqrt, linspace
+import vtk
+from numpy import array, linspace, sqrt, zeros
 from numpy.linalg import norm
 from vtk.util.numpy_support import numpy_to_vtk
-import h5utils.constants as constants
+
+from h5utils import constants
 
 # This value can be changed by the user for the whole module to change data precision.
 vtkScalarArray = vtk.vtkFloatArray
 #vtkScalarArray = vtk.vtkDoubleArray
 
-class Lattice(object):
+class Lattice:
   '''
   The lattice class is normally used only for the geometry-lattice variable, and specifies the three lattice directions of the crystal and the lengths of the corresponding lattice vectors.
 
@@ -72,16 +71,15 @@ class Lattice(object):
     self.zmesh = [0,1]
     self.setResolution(10, 10, 10)
 
-    return
 
   def __str__(self):
     '''str constructor, used to print the object instance.'''
     ret = 'lattice:\n'
-    ret += '  basis1 = {}\n'.format(self.basis1)
-    ret += '  basis2 = {}\n'.format(self.basis2)
-    ret += '  basis3 = {}\n'.format(self.basis3)
-    ret += '  basis_size = {}\n'.format(self.basis_size)
-    ret += '  size = {}'.format(self.size)
+    ret += f'  basis1 = {self.basis1}\n'
+    ret += f'  basis2 = {self.basis2}\n'
+    ret += f'  basis3 = {self.basis3}\n'
+    ret += f'  basis_size = {self.basis_size}\n'
+    ret += f'  size = {self.size}'
     return(ret)
 
   def getLatticeVectors(self):
@@ -149,22 +147,18 @@ class Lattice(object):
     self.xmesh = linspace(-0.5, 0.5, Nx) if Nx > 1 else array([0.0])
     self.ymesh = linspace(-0.5, 0.5, Ny) if Ny > 1 else array([0.0])
     self.zmesh = linspace(-0.5, 0.5, Nz) if Nz > 1 else array([0.0])
-    return
 
   def getMesh(self):
     return (self.xmesh, self.ymesh, self.zmesh)
 
   def setXmesh(self, xmesh):
     self.xmesh = xmesh
-    return
 
   def setYmesh(self, ymesh):
     self.ymesh = ymesh
-    return
 
   def setZmesh(self, zmesh):
     self.zmesh = zmesh
-    return
 
   def setSize(self, size):
     self.size = size
@@ -176,7 +170,7 @@ class FCClattice(Lattice):
   ''' Create a FCC lattice. '''
   def __init__(self):
     ''' Constructor '''
-    super(FCClattice, self).__init__()
+    super().__init__()
     # set up lattice
     self.basis1 = array([0, 1, 1])
     self.basis2 = array([1, 0, 1])
@@ -187,7 +181,7 @@ class BCClattice(Lattice):
   ''' Create a BCC lattice. '''
   def __init__(self):
     ''' Constructor '''
-    super(BCClattice, self).__init__()
+    super().__init__()
     # set up lattice
     self.basis1 = array([-1,  1,  1])
     self.basis2 = array([ 1, -1,  1])
@@ -206,14 +200,14 @@ def h5_getDataSets(HDF5_file_object):
   print('=== Contents: ===')
   def printname(name, obj):
     if isinstance(obj, h5py.Group):
-      print('Group: {}'.format(name))
+      print(f'Group: {name}')
     elif isinstance(obj, h5py.Dataset):
-      print('Dataset: {}'.format(name))
+      print(f'Dataset: {name}')
       if name not in ['description','lattice vectors', 'xmesh', 'ymesh', 'zmesh']:
         dataset_list.append(name)
   HDF5_file_object.visititems(printname)
   print('======')
-  print('Available datasets: {}'.format(dataset_list))
+  print(f'Available datasets: {dataset_list}')
   return(dataset_list)
 
 def h5_setupLattice(HDF5_file_object, total_lattice_size=None, requested_dataset=[]):
@@ -222,13 +216,13 @@ def h5_setupLattice(HDF5_file_object, total_lattice_size=None, requested_dataset
   if 'description' in HDF5_file_object.keys():
     #description              Dataset {SCALAR}
     description = HDF5_file_object['description'][...].tobytes().decode("ascii").strip('\0')
-    print('description = {}'.format(description))
+    print(f'description = {description}')
 
   complete_dataset_list = h5_getDataSets(HDF5_file_object)
   if requested_dataset:
     for i in requested_dataset:
       if i not in complete_dataset_list:
-        raise Exception('Requested dataset not found: {}'.format(i))
+        raise Exception(f'Requested dataset not found: {i}')
 
   # choose first dataset if not specified
   if requested_dataset:
@@ -238,7 +232,7 @@ def h5_setupLattice(HDF5_file_object, total_lattice_size=None, requested_dataset
 
   # set up data, Nx, Ny, Nz
   # TODO: Might cause conflict with size read from x/y/z mesh values... Add warnings?
-  print('Using dataset = {} to determine dimensions.'.format(selected_dataset))
+  print(f'Using dataset = {selected_dataset} to determine dimensions.')
   data = HDF5_file_object[selected_dataset]
   if len(data.shape) == 3:
     (Nx, Ny, Nz) = data.shape
@@ -247,7 +241,7 @@ def h5_setupLattice(HDF5_file_object, total_lattice_size=None, requested_dataset
     (Nx, Ny) = data.shape
     Nz = 1
   else:
-    raise Exception('Data of dimension {}. Only 2D and 3D data supported at the moment.'.format(len(data.shape)))
+    raise Exception(f'Data of dimension {len(data.shape)}. Only 2D and 3D data supported at the moment.')
 
   # set up lattice
   mylattice = Lattice()
@@ -275,11 +269,11 @@ def h5_setupLattice(HDF5_file_object, total_lattice_size=None, requested_dataset
 
   (a1, a2, a3) = mylattice.getLatticeVectors()
   (xmesh, ymesh, zmesh) = mylattice.getMesh()
-  print('a1 = {}'.format(a1))
-  print('a2 = {}'.format(a2))
-  print('a3 = {}'.format(a3))
-  print('data.shape = {} x {} x {}'.format(Nx, Ny, Nz))
-  print('mesh.shape = {} x {} x {}'.format(len(xmesh), len(ymesh), len(zmesh)))
+  print(f'a1 = {a1}')
+  print(f'a2 = {a2}')
+  print(f'a3 = {a3}')
+  print(f'data.shape = {Nx} x {Ny} x {Nz}')
+  print(f'mesh.shape = {len(xmesh)} x {len(ymesh)} x {len(zmesh)}')
   if Nx != len(xmesh) or Ny != len(ymesh) or Nz != len(zmesh):
     raise Exception('Inconsistent number of cells between the dataset and the x/y/z meshs.')
   return (mylattice, complete_dataset_list)
@@ -311,7 +305,7 @@ def MPB_h5tovts(h5file, basepath, total_lattice_size=None, requested_dataset=[],
     # create the vtkScalarArray structures for the data
     dataset_dict = dict()
     for key in dataset_list:
-      print('key = {}'.format(key))
+      print(f'key = {key}')
 
       try:
         # We need flat 1D data for VTK structures (and for numpy_to_vtk). Equivalent ways of achieving this:
@@ -325,7 +319,7 @@ def MPB_h5tovts(h5file, basepath, total_lattice_size=None, requested_dataset=[],
         scalar = HDF5_file_object[key][...].flatten(order='F') # OK
         #scalar = HDF5_file_object[key][...].ravel(order='F') # OK
       except:
-        print('scalar = {}'.format(scalar))
+        print(f'scalar = {scalar}')
         print('In case of this error: TypeError: CreateDataArray argument 1: an integer is required')
         print('Just make sure to use the --bfdtd option, until auto-detection arrives.')
         raise
@@ -362,12 +356,12 @@ def MPB_h5tovts(h5file, basepath, total_lattice_size=None, requested_dataset=[],
           #) 		[pure virtual]
 
           if time.time() - last_info_time > 5:
-            print('{} %'.format(100*offset/(Nx*Ny*Nz-1)))
+            print(f'{100*offset/(Nx*Ny*Nz-1)} %')
             last_info_time = time.time()
 
           if verbosity>1:
             counter += 1
-            progress_str = 'Progress: {}/{}'.format(counter, Nx*Ny*Nz)
+            progress_str = f'Progress: {counter}/{Nx*Ny*Nz}'
             #print(progress_str, end='\r')
             print(progress_str)
             #subprocess.call(["printf", progress_str+'\r'])
@@ -393,7 +387,7 @@ def MPB_h5tovts(h5file, basepath, total_lattice_size=None, requested_dataset=[],
     dataset_vti.SetSpacing(mylattice.getSpacing())
 
     # add scalar data to the grids
-    for key in dataset_dict.keys():
+    for key in dataset_dict:
       dataset_vts.GetPointData().AddArray(dataset_dict[key][1])
       dataset_vti.GetPointData().AddArray(dataset_dict[key][1])
 
@@ -433,11 +427,11 @@ def BFDTD_h5_to_vts(h5file, basepath, total_lattice_size=None, requested_dataset
   #x_relative_range = [1/3, 2/3]
   #y_relative_range = [1/3, 2/3]
   #z_relative_range = [1/3, 2/3]
-  print('x_relative_range: {}'.format(x_relative_range))
-  print('y_relative_range: {}'.format(y_relative_range))
-  print('z_relative_range: {}'.format(z_relative_range))
+  print(f'x_relative_range: {x_relative_range}')
+  print(f'y_relative_range: {y_relative_range}')
+  print(f'z_relative_range: {z_relative_range}')
 
-  print('{} -> {}.vts'.format(h5file, basepath))
+  print(f'{h5file} -> {basepath}.vts')
 
   # read in .h5 file
   with h5py.File(h5file, "r") as HDF5_file_object:
@@ -466,7 +460,7 @@ def BFDTD_h5_to_vts(h5file, basepath, total_lattice_size=None, requested_dataset
         break
 
     if material_data:
-      print('Found material data in: {}'.format(material_data.name))
+      print(f'Found material data in: {material_data.name}')
     else:
       print('Warning: No material data found. No electric energy density data can be calculated.')
 
@@ -531,10 +525,10 @@ def BFDTD_h5_to_vts(h5file, basepath, total_lattice_size=None, requested_dataset
       Npoints_partial = Nx_partial*Ny_partial*Nz_partial
 
       print( 'Range to fill:' )
-      print( 'x: {} -> size={}/{}'.format((x_range[0], x_range[-1]), Nx_partial, Nx) )
-      print( 'y: {} -> size={}/{}'.format((y_range[0], y_range[-1]), Ny_partial, Ny) )
-      print( 'z: {} -> size={}/{}'.format((z_range[0], z_range[-1]), Nz_partial, Nz) )
-      print( 'total points to fill: {}/{}'.format(Npoints_partial, Npoints) )
+      print( f'x: {(x_range[0], x_range[-1])} -> size={Nx_partial}/{Nx}' )
+      print( f'y: {(y_range[0], y_range[-1])} -> size={Ny_partial}/{Ny}' )
+      print( f'z: {(z_range[0], z_range[-1])} -> size={Nz_partial}/{Nz}' )
+      print( f'total points to fill: {Npoints_partial}/{Npoints}' )
 
       if dry_run:
         return
@@ -602,7 +596,7 @@ def BFDTD_h5_to_vts(h5file, basepath, total_lattice_size=None, requested_dataset
             if time.time() - last_info_time > 5 or verbosity > 1:
               #print('Progress: {}/{} = {} %'.format(offset+1, Npoints, 100*(offset+1)/Npoints))
               offset_partial = (i-x_range[0]) + (j-y_range[0])*Nx_partial + (k-z_range[0])*Nx_partial*Ny_partial
-              print('Progress: {}/{} = {} %'.format(offset_partial+1, Npoints_partial, 100*(offset_partial+1)/Npoints_partial))
+              print(f'Progress: {offset_partial+1}/{Npoints_partial} = {100*(offset_partial+1)/Npoints_partial} %')
               last_info_time = time.time()
 
       print('Loops done.')
@@ -647,7 +641,7 @@ def BFDTD_h5_to_vts(h5file, basepath, total_lattice_size=None, requested_dataset
       writer_vtr.SetInputData(dataset_vtr)
       writer_vtr.Write()
 
-      print('{} -> {}'.format(data.name, writer_vtr.GetFileName()))
+      print(f'{data.name} -> {writer_vtr.GetFileName()}')
 
     return
 
@@ -733,10 +727,7 @@ def stltoh5(stlfile, basepath, epsilon_inside, epsilon_outside, lattice=Lattice(
   '''
 
   if not os.path.exists(stlfile):
-    if sys.version_info.major == 2:
-      raise IOError('No such file or directory: {}'.format(stlfile)) # py2
-    else:
-      raise FileNotFoundError('No such file or directory: {}'.format(stlfile)) # py3
+    raise FileNotFoundError(f'No such file or directory: {stlfile}') # py3
 
   print('--> timer start')
   time_start = time.time()
@@ -761,7 +752,6 @@ def stltoh5(stlfile, basepath, epsilon_inside, epsilon_outside, lattice=Lattice(
 
   stl_to_vts_and_h5(implicit_function, basepath, lattice, epsilon_inside, epsilon_outside)
   print("--> Elapsed time: %.4f sec" % (time.time() - time_start))
-  return
 
 def stl_to_vts_and_h5(implicit_function, outfile_basename, lattice, epsilon_inside, epsilon_outside):
   (Nx, Ny, Nz) = lattice.getResolution()
@@ -794,7 +784,7 @@ def stl_to_vts_and_h5(implicit_function, outfile_basename, lattice, epsilon_insi
         scalars_numpy[i, j, k] = value
 
         if time.time() - last_info_time > 5:
-          print('{} %'.format(100*offset/(Nx*Ny*Nz-1)))
+          print(f'{100*offset/(Nx*Ny*Nz-1)} %')
           last_info_time = time.time()
 
   print('=== Loop end ===')
@@ -839,7 +829,6 @@ def stl_to_vts_and_h5(implicit_function, outfile_basename, lattice, epsilon_insi
     #epsilon_inverse.yz       Dataset {100, 100, 100}
     #epsilon_inverse.zz       Dataset {100, 100, 100}
 
-  return
 
 if __name__ == '__main__':
 	pass

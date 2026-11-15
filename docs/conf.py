@@ -12,6 +12,7 @@
 #
 import os
 import sys
+
 #sys.path.insert(0, os.path.abspath('../h5utils'))
 sys.path.insert(0, os.path.abspath('../'))
 
@@ -72,7 +73,7 @@ html_theme_options = {
     "github_user": "mtav",
     "github_repo": "h5utils",
     "fixed_sidebar": True,
-    #"tidelift_url": "https://tidelift.com/subscription/pkg/pypi-alabaster?utm_source=pypi-alabaster&utm_medium=referral&utm_campaign=docs",  # noqa
+    #"tidelift_url": "https://tidelift.com/subscription/pkg/pypi-alabaster?utm_source=pypi-alabaster&utm_medium=referral&utm_campaign=docs",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

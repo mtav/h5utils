@@ -69,6 +69,33 @@ Running tests, linting and code formatting
         ruff check
         pylint ./h5utils/
 
+Help with ruff:
+===============
+
+.. code:: bash
+
+        # Select specific rules/files/folders
+        ruff check --select UP008
+        ruff check --select UP008 --fix
+        ruff check --select UP008,UP004 --fix h5utils/h5utils.py
+        ruff check --select UP008,UP004 --fix h5utils/
+
+        # Preview the safe fixes as a diff, changing nothing
+        ruff check --diff .
+
+        # Apply only the safe fixes
+        ruff check --fix .
+
+        # List which violations are safely fixable
+        # The marker [*] in Ruff’s output means “safe fix available”. Unsafe fixes appear only when you add --unsafe-fixes.
+        ruff check --output-format=concise . | grep '\[\*\]'
+
+        # Count fixable rules at a glance
+        ruff check --statistics .
+
+        # Preview the unsafe fixes as well
+        ruff check --diff --unsafe-fixes .
+
 TODO
 ====
 * Fix pylint and ruff warnings.
@@ -78,3 +105,5 @@ TODO
 * Update docs and make new relase with 2D support.
 * Add array creation. (like mpb-data -x -y -z)
 * Add rectangular cell output. (like mpb-data -r)
+* Replace constants module with scipy.constants.
+* Add examples/tests/documentation for BFDTD support.

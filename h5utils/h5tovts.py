@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 '''
 Module providing the h5tovts function.
@@ -15,15 +14,17 @@ Last successful test using:
 .. todo:: Add vtk version checker + eventual multiversion support.
 '''
 
+import argparse
 import os
 import sys
-import argparse
 import warnings
-import vtk
-import h5py
 
-import h5utils.h5utils as h5utils
-from h5utils.h5utils import MPB_h5tovts, BFDTD_h5_to_vts, h5_getDataSets
+import h5py
+import vtk
+
+from h5utils import h5utils
+from h5utils.h5utils import BFDTD_h5_to_vts, MPB_h5tovts, h5_getDataSets
+
 
 def h5tovts_parse_args(args):
     '''
@@ -99,7 +100,7 @@ def h5tovts(arguments):
 
     for h5file in arguments.h5file:
         if not os.path.exists(h5file):
-            warnings.warn('Error: File not found: {}'.format(h5file))
+            warnings.warn(f'Error: File not found: {h5file}')
             warnings.warn('''If the filename contains spaces, simply use the --single-h5file option
               (for a single input file).
               For multiple files, use escaped double quotes,
@@ -111,7 +112,7 @@ def h5tovts(arguments):
             with h5py.File(h5file, "r") as hdf5_file_object:
                 h5_getDataSets(hdf5_file_object)
         else:
-            print('==> {0} -> {1}.vts and/or {1}.vti'.format(h5file, basepath))
+            print(f'==> {h5file} -> {basepath}.vts and/or {basepath}.vti')
             # .. todo:: might be worth switching to a class/object to reduce argument length?
             if arguments.bfdtd:
                 BFDTD_h5_to_vts(h5file, basepath, arguments.size, arguments.dataset,

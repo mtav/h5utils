@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 '''
 This module provides Physical constants.
@@ -116,8 +115,6 @@ all_dict = {'lightvel':['velocity of light in vacuum', 'c', cloc, 0., 0., '299 7
             'stefan-boltzm':['Stefan-Boltzmann constant = pi^2 k^4/(60 hbar^3 c^2)', 'sigma', 5.670400e-8, 4.0e-13, 7.0e-6, '5.670 400(40) e-8 W m^-2 K^-4', 'CODATA 2006']}
 
 # many common values are also available as global constants:
-global alpha, a_0, c, e, eps_0, F, G, g_e, g_p, gamma_p, h, hbar, k_B
-global m_d, m_e, m_n, m_p, mu_B, mu_e, mu_N, mu_p, mu_0, N_A, R, sigma, u
 alpha = all_dict['alpha'][2]
 a_0 = all_dict['bohrradius'][2]
 c = cloc

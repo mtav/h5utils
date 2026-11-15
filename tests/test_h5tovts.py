@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
+import glob
 import os
 import sys
-import glob
-import unittest
 import tempfile
-import numpy
+import unittest
+
 import h5py
+import numpy
 import vtk
+
 import h5utils.h5tovts
+
 
 class test_h5tovts(unittest.TestCase):
     def test_conversion(self):
