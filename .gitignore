@@ -6,6 +6,9 @@ dist/
 *.pyc
 *.vti
 *.vts
+*.vtk
+*.patch
+*.disabled
 
 ########### PyCharm
 .idea/h5utils.iml
