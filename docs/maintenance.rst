@@ -6,8 +6,18 @@ Packages to install for maintainance/development
 ================================================
 * bumpversion
 * tox
-* ruff
 * pylint
+* twine
+* python3-pytest
+* python3-build
+* ruff
+
+On Ubuntu
+---------
+.. code:: bash
+
+        sudo apt install bumpversion tox pylint python3-build twine python3-pytest
+        sudo snap install ruff
 
 Releasing a new version:
 ========================
@@ -60,6 +70,8 @@ Running tests, linting and code formatting
         # With pytest
         pip install pytest
         pytest tests -v
+        # in case of error: ModuleNotFoundError: No module named 'h5utils':
+        python3 -m pytest
         # With tox
         tox                  # all environments
         tox -e 3.12          # one Python version
@@ -68,6 +80,17 @@ Running tests, linting and code formatting
         # Linting and code formatting
         ruff check
         pylint ./h5utils/
+
+pytest
+------
+.. code:: bash
+
+        # from h5utils repository or source directory
+        python -m venv .venv
+        source .venv/bin/activate
+        pip install -e .            # editable install of h5utils
+        pip install pytest          # pytest must live in the venv too
+        pytest
 
 Help with ruff:
 ===============
@@ -107,3 +130,7 @@ TODO
 * Add rectangular cell output. (like mpb-data -r)
 * Replace constants module with scipy.constants.
 * Add examples/tests/documentation for BFDTD support.
+* Format using black
+* Add pylint to tox config.
+* Move test data into test folder. Adapt build system so it goes into sdist, but not wheel.
+* Test with howfairis and pass all tests: https://www.howfairis.com/

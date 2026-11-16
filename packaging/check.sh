@@ -20,6 +20,6 @@ source ${VENVDIR}/bin/activate
 unset PYTHONPATH PYTHONSTARTUP
 # pip uninstall ${NAME}
 # pip install --force-reinstall --upgrade ${ORIGDIR}/dist/${NAME}-${CURRENT_VERSION}-py3-none-any.whl
-pip install --upgrade ${ORIGDIR}/dist/${NAME}-${CURRENT_VERSION}-py3-none-any.whl
+pip install --upgrade --force-reinstall "${ORIGDIR}/dist/${NAME}-${CURRENT_VERSION}-py3-none-any.whl"
 # find ${VENVDIR}/lib/python3.8/site-packages/
-cat ${VENVDIR}/lib/python3.8/site-packages/${NAME}-${CURRENT_VERSION}.dist-info/RECORD
+cat "${VENVDIR}"/lib/python*/site-packages/"${NAME}-${CURRENT_VERSION}.dist-info/RECORD"
