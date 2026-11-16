@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
 Module providing the h5tovts function.
 
 It can be used as is or via the console entry point defined in pyproject.toml.
@@ -12,7 +12,7 @@ Last successful test using:
   * python3-vtk7   7.1.1+dfsg2-4ubuntu4 amd64
 
 .. todo:: Add vtk version checker + eventual multiversion support.
-'''
+"""
 
 import argparse
 import os
@@ -27,84 +27,122 @@ from h5utils.h5utils import BFDTD_h5_to_vts, MPB_h5tovts, h5_getDataSets
 
 
 def h5tovts_parse_args(args):
-    '''
+    """
     Argument parser for *h5tovts*. The output of this function can be passed to :py:func:`h5tovts`.
-    '''
+    """
 
-    parser = argparse.ArgumentParser(description='Convert an MPB-created HDF5 file to a .vts file.')
-    parser.add_argument('-v', '--verbose', action="count", dest="verbosity",
-                        default=0, help='verbosity level')
+    parser = argparse.ArgumentParser(
+        description="Convert an MPB-created HDF5 file to a .vts file."
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        dest="verbosity",
+        default=0,
+        help="verbosity level",
+    )
 
-    parser.add_argument('h5file', action="store", help='input HDF5 file', nargs='+')
-    parser.add_argument('--single-h5file', action='store_true',
-                        help='''If this option is given, all h5file arguments
+    parser.add_argument("h5file", action="store", help="input HDF5 file", nargs="+")
+    parser.add_argument(
+        "--single-h5file",
+        action="store_true",
+        help="""If this option is given, all h5file arguments
                         passed are merged together into a single file,
                         i.e. "h5tovts.py a b c.h5" will try to open "a b c.h5".
                         This has been added to deal with spaces in filenames,
-                        something python2 has trouble with.''')
-    #parser.add_argument('vtsfile', action="store", help='output .vts file', nargs='?')
-    #parser.add_argument('-b','--basepath', action="store", default=None,
+                        something python2 has trouble with.""",
+    )
+    # parser.add_argument('vtsfile', action="store", help='output .vts file', nargs='?')
+    # parser.add_argument('-b','--basepath', action="store", default=None,
     #  help='basepath for output files')
-    parser.add_argument('-s', '--suffix', action="store", default='',
-                        help='additional suffix for output files')
+    parser.add_argument(
+        "-s",
+        "--suffix",
+        action="store",
+        default="",
+        help="additional suffix for output files",
+    )
 
-    parser.add_argument('--size', nargs=3, type=float, default=None,
-                        help='''lattice size (only used for .h5 files without lattice vectors,
-                        i.e. MEEP output, not for MPB output.)''')
-    parser.add_argument('-d', '--dataset',
-                        help='use dataset <name> in the input files (default: first dataset)',
-                        metavar='name', nargs='+', default=[])
+    parser.add_argument(
+        "--size",
+        nargs=3,
+        type=float,
+        default=None,
+        help="""lattice size (only used for .h5 files without lattice vectors,
+                        i.e. MEEP output, not for MPB output.)""",
+    )
+    parser.add_argument(
+        "-d",
+        "--dataset",
+        help="use dataset <name> in the input files (default: first dataset)",
+        metavar="name",
+        nargs="+",
+        default=[],
+    )
 
-    parser.add_argument('--bfdtd', action='store_true', help='HDF5 file is in the BFDTD format')
-    parser.add_argument('-l', '--list', action='store_true', help='list contents only')
+    parser.add_argument(
+        "--bfdtd", action="store_true", help="HDF5 file is in the BFDTD format"
+    )
+    parser.add_argument("-l", "--list", action="store_true", help="list contents only")
 
-    parser.add_argument('--double', action='store_true', help='Use Double instead of Float.')
-    parser.add_argument('--real-units', action='store_true',
-                        help='''Use "real units",
-                        i.e. multiply by epsilon0/mu0 for energy densities.''')
+    parser.add_argument(
+        "--double", action="store_true", help="Use Double instead of Float."
+    )
+    parser.add_argument(
+        "--real-units",
+        action="store_true",
+        help="""Use "real units",
+                        i.e. multiply by epsilon0/mu0 for energy densities.""",
+    )
 
-    parser.add_argument('--x-range', default=[0, 1], type=float, nargs=2)
-    parser.add_argument('--y-range', default=[0, 1], type=float, nargs=2)
-    parser.add_argument('--z-range', default=[0, 1], type=float, nargs=2)
+    parser.add_argument("--x-range", default=[0, 1], type=float, nargs=2)
+    parser.add_argument("--y-range", default=[0, 1], type=float, nargs=2)
+    parser.add_argument("--z-range", default=[0, 1], type=float, nargs=2)
 
-    parser.add_argument('-n', '--dry-run', action='store_true', help='Just do a dry/test-run.')
+    parser.add_argument(
+        "-n", "--dry-run", action="store_true", help="Just do a dry/test-run."
+    )
 
     arguments = parser.parse_args(args)
     print(arguments)
     return arguments
 
+
 def h5tovts(arguments):
-    '''
+    """
     *h5tovts* argument processing function.
     The arguments can be generated by :py:func:`h5tovts_parse_args`.
 
     .. todo:: converting .prn to unstructured .h5 would increase conversion speed
       (and then of course direct .prn to .vts conversion and/or C++ code)
-    '''
+    """
 
     if arguments.verbosity > 0:
-        print('---------')
+        print("---------")
         print(arguments)
-        print('---------')
+        print("---------")
 
-    #if not len(sys.argv) > 1:
-      #parser.print_help()
-    #else:
-    #if arguments.basepath is None:
-      #arguments.basepath = os.path.splitext(arguments.h5file)[0]
+    # if not len(sys.argv) > 1:
+    # parser.print_help()
+    # else:
+    # if arguments.basepath is None:
+    # arguments.basepath = os.path.splitext(arguments.h5file)[0]
     if arguments.double:
         h5utils.vtkScalarArray = vtk.vtkDoubleArray
 
     if arguments.single_h5file:
-        arguments.h5file = [' '.join(arguments.h5file)]
+        arguments.h5file = [" ".join(arguments.h5file)]
 
     for h5file in arguments.h5file:
         if not os.path.exists(h5file):
-            warnings.warn(f'Error: File not found: {h5file}')
-            warnings.warn('''If the filename contains spaces, simply use the --single-h5file option
+            warnings.warn(f"Error: File not found: {h5file}")
+            warnings.warn(
+                """If the filename contains spaces, simply use the --single-h5file option
               (for a single input file).
               For multiple files, use escaped double quotes,
-              i.e. \"a b c\", or even \"" if there are parentheses, etc.''')
+              i.e. \"a b c\", or even \"" if there are parentheses, etc."""
+            )
             continue
 
         basepath = os.path.splitext(h5file)[0] + arguments.suffix
@@ -112,21 +150,35 @@ def h5tovts(arguments):
             with h5py.File(h5file, "r") as hdf5_file_object:
                 h5_getDataSets(hdf5_file_object)
         else:
-            print(f'==> {h5file} -> {basepath}.vts and/or {basepath}.vti')
+            print(f"==> {h5file} -> {basepath}.vts and/or {basepath}.vti")
             # .. todo:: might be worth switching to a class/object to reduce argument length?
             if arguments.bfdtd:
-                BFDTD_h5_to_vts(h5file, basepath, arguments.size, arguments.dataset,
-                                arguments.verbosity,
-                                arguments.x_range, arguments.y_range, arguments.z_range,
-                                arguments.real_units,
-                                arguments.dry_run)
+                BFDTD_h5_to_vts(
+                    h5file,
+                    basepath,
+                    arguments.size,
+                    arguments.dataset,
+                    arguments.verbosity,
+                    arguments.x_range,
+                    arguments.y_range,
+                    arguments.z_range,
+                    arguments.real_units,
+                    arguments.dry_run,
+                )
             else:
-                MPB_h5tovts(h5file, basepath, arguments.size, arguments.dataset,
-                            arguments.verbosity)
+                MPB_h5tovts(
+                    h5file,
+                    basepath,
+                    arguments.size,
+                    arguments.dataset,
+                    arguments.verbosity,
+                )
+
 
 def main():
-    '''main function, used as console entry point in pyproject.toml'''
+    """main function, used as console entry point in pyproject.toml"""
     return h5tovts(h5tovts_parse_args(sys.argv[1:]))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main())
