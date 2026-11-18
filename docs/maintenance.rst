@@ -134,3 +134,4 @@ TODO
 * Add pylint to tox config.
 * Move test data into test folder. Adapt build system so it goes into sdist, but not wheel.
 * Test with howfairis and pass all tests: https://www.howfairis.com/
+* Add support for datasets with mixed 2D and 3D data. (Possibly 3D meep/bfdtd output with 2D slices? (maybe even 1D? and 0D (time domain probes)?))
