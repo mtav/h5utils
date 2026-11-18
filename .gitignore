@@ -9,6 +9,7 @@ dist/
 *.vtk
 *.patch
 *.disabled
+*.log
 
 ########### PyCharm
 .idea/h5utils.iml

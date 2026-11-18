@@ -227,14 +227,30 @@ def h5_getDataSets(HDF5_file_object):
     return dataset_list
 
 
+def h5_readString(dataset):
+    """Read a scalar string dataset, whether fixed-length or variable-length.
+
+    MPB writes "description" as a fixed-length string, but other writers
+    (e.g. h5py, newer MPB/MEEP builds) use variable-length strings, whose
+    in-memory representation is an object pointer. Calling .tobytes() on
+    those returns the pointer bytes, not the text.
+    """
+    value = dataset[()]
+    if isinstance(value, numpy.ndarray):  # e.g. shape (1,) or fixed-length arrays
+        value = value.reshape(-1)[0] if value.size else b""
+    if isinstance(value, numpy.void):
+        value = value.tobytes()
+    if isinstance(value, (bytes, numpy.bytes_)):
+        return bytes(value).decode("utf-8", errors="replace").strip("\0").strip()
+    return str(value).strip("\0").strip()
+
+
 def h5_setupLattice(HDF5_file_object, total_lattice_size=None, requested_dataset=[]):
     # get description
     description = None
     if "description" in HDF5_file_object.keys():
         # description              Dataset {SCALAR}
-        description = (
-            HDF5_file_object["description"][...].tobytes().decode("ascii").strip("\0")
-        )
+        description = h5_readString(HDF5_file_object["description"])
         print(f"description = {description}")
 
     complete_dataset_list = h5_getDataSets(HDF5_file_object)
