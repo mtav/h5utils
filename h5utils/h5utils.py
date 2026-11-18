@@ -196,6 +196,17 @@ class BCClattice(Lattice):
         self.basis_size = array([sqrt(3) / 2, sqrt(3) / 2, sqrt(3) / 2])
 
 
+# Datasets which describe the grid/run and are not field data to be converted.
+H5_METADATA_DATASETS = (
+    "description",
+    "lattice vectors",
+    "Bloch wavevector",
+    "xmesh",
+    "ymesh",
+    "zmesh",
+)
+
+
 def h5_getDataSets(HDF5_file_object):
     # create list of datasets
     # dataset_list = [k for k in HDF5_file_object.keys() if k not in ['description','lattice vectors', 'xmesh', 'ymesh', 'zmesh'] ]
@@ -212,14 +223,14 @@ def h5_getDataSets(HDF5_file_object):
             print(f"Group: {name}")
         elif isinstance(obj, h5py.Dataset):
             print(f"Dataset: {name}")
-            if name not in [
-                "description",
-                "lattice vectors",
-                "xmesh",
-                "ymesh",
-                "zmesh",
-            ]:
-                dataset_list.append(name)
+            if name in H5_METADATA_DATASETS:
+                return
+            # Field data must be 2D or 3D. Anything else (e.g. other small
+            # 1D metadata arrays) cannot be mapped onto the grid.
+            if obj.ndim not in (2, 3):
+                print(f"Skipping {name}: {obj.ndim}D dataset (only 2D/3D supported).")
+                return
+            dataset_list.append(name)
 
     HDF5_file_object.visititems(printname)
     print("======")

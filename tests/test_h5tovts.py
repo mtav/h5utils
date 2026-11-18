@@ -135,6 +135,58 @@ class test_h5tovts(unittest.TestCase):
             self.assertTrue(os.path.isfile(os.path.join(tmpdir, "vlen_desc.vts")))
             self.assertTrue(os.path.isfile(os.path.join(tmpdir, "vlen_desc.vti")))
 
+    def test_getDataSets_skips_metadata(self):
+        """Metadata (incl. 1D 'Bloch wavevector') must not be treated as field data."""
+        with (
+            tempfile.TemporaryDirectory() as tmpdir,
+            h5py.File(os.path.join(tmpdir, "meta.h5"), "w") as f,
+        ):
+            f.create_dataset("Bloch wavevector", data=numpy.array([-1 / 3, 1 / 3, 0.0]))
+            f.create_dataset("description", data=numpy.bytes_("e field"))
+            f.create_dataset("lattice vectors", data=numpy.eye(3))
+            f.create_dataset("some 1D metadata", data=numpy.arange(5.0))
+            f.create_dataset("z.i", data=numpy.zeros((4, 4)))
+            f.create_dataset("z.r", data=numpy.zeros((4, 4)))
+            f.create_dataset("data", data=numpy.zeros((4, 4, 4)))
+            self.assertEqual(
+                sorted(h5utils.h5utils.h5_getDataSets(f)), ["data", "z.i", "z.r"]
+            )
+
+    def test_MPB_2D_field_with_bloch_wavevector(self):
+        """Regression: MPB 2D field files (e.g. tri-rods-e.k11.b01.z.tm.h5) contain a
+        'Bloch wavevector' dataset of shape (3,) which was used to determine the grid size."""
+        N = 8
+        zr = numpy.arange(N * N, dtype="f8").reshape(N, N)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            h5file = os.path.join(tmpdir, "mpb2d.h5")
+            with h5py.File(h5file, "w") as f:
+                f.create_dataset("Bloch wavevector", data=[-1 / 3, 1 / 3, 0.0])
+                f.create_dataset("description", data=numpy.bytes_("e field, kpoint 11"))
+                f.create_dataset(
+                    "lattice vectors",
+                    data=[[0.8660254, 0.5, 0], [0.8660254, -0.5, 0], [0, 0, 1]],
+                )
+                f.create_dataset("z.r", data=zr)
+                f.create_dataset("z.i", data=-zr)
+            h5utils.h5tovts.h5tovts(h5utils.h5tovts.h5tovts_parse_args([h5file]))
+            reader = vtk.vtkXMLStructuredGridReader()
+            reader.SetFileName(os.path.join(tmpdir, "mpb2d.vts"))
+            reader.Update()
+            out = reader.GetOutput()
+            self.assertEqual(out.GetNumberOfPoints(), N * N)
+            pd = out.GetPointData()
+            names = sorted(pd.GetArrayName(i) for i in range(pd.GetNumberOfArrays()))
+            self.assertEqual(names, ["z.i", "z.r"])
+            from vtk.util.numpy_support import vtk_to_numpy
+
+            for name, expected in (("z.r", zr), ("z.i", -zr)):
+                with self.subTest(name):
+                    self.assertTrue(
+                        numpy.allclose(
+                            vtk_to_numpy(pd.GetArray(name)).reshape(N, N).T, expected
+                        )
+                    )
+
     def test_listing(self):
         print("Testing h5tovts listing:")
         d = os.path.join(os.path.dirname(h5utils.__file__), "data")
