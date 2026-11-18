@@ -15,13 +15,34 @@ import h5utils.h5utils
 
 class test_h5tovts(unittest.TestCase):
     def test_conversion(self):
+        '''
+        Runs h5tovts on all .h5 files in data.
+        Use this to see a summary after running pytest:
+          pytest -k test_conversion -s
+        '''
         print("Testing h5tovts conversion:")
         d = os.path.join(os.path.dirname(h5utils.__file__), "data")
-        f = os.listdir(d)
-        f = glob.glob(os.path.join(d, "*.h5"))
-        print(f"f: {f}")
-        sys.argv = ["h5tovts"] + f
-        h5utils.h5tovts.main()
+        files = sorted(glob.glob(os.path.join(d, "*.h5")))
+        print(f"files: {files}")
+        self.assertTrue(files, f"No .h5 files found in {d}")
+
+        # Convert each file separately, so that one failing file does not stop
+        # the others from being tested, and each gets its own pass/fail result.
+        results = {}
+        for h5file in files:
+            name = os.path.basename(h5file)
+            with self.subTest(name):
+                try:
+                    sys.argv = ["h5tovts", h5file]
+                    h5utils.h5tovts.main()
+                except BaseException:
+                    results[name] = "FAILED"
+                    raise
+                results[name] = "OK"
+
+        print("h5tovts conversion summary:")
+        for name, status in results.items():
+            print(f"  {status:6} {name}")
 
     def test_2D_conversion(self):
         """2D datasets (e.g. shape (Nx, Ny)) are converted as a single-layer 3D grid, see issue #1."""
