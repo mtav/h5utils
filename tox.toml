@@ -16,5 +16,11 @@ commands = [["pytest", { replace = "posargs", default = ["tests"], extend = true
 [env.lint]
 description = "run linters"
 skip_install = true
-deps = ["ruff"]
-commands = [["ruff", "check", { replace = "posargs", default = ["."], extend = true }]]
+deps = ["ruff", "black", "pylint", "-r{tox_root}/requirements.txt"]  # pylint needs the runtime deps to resolve imports
+ignore_errors = true  # run every linter and report all failures, instead of stopping at the first
+commands = [
+    ["ruff", "check", { replace = "posargs", default = ["."], extend = true }],
+    ["black", "--check", "--diff", "{tox_root}"],
+#    ["pylint", "--ignored-modules=vtk,vtkmodules", "h5utils/"],
+    ["pylint", "h5utils/"],
+]
