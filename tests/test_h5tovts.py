@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+import contextlib
 import glob
+import io
 import os
 import sys
 import tempfile
@@ -186,6 +188,75 @@ class test_h5tovts(unittest.TestCase):
                             vtk_to_numpy(pd.GetArray(name)).reshape(N, N).T, expected
                         )
                     )
+
+    @staticmethod
+    def _convert_and_read(h5file, extra_args=()):
+        """Convert h5file and return (stdout, {ext: (npoints, {array name: ntuples})})."""
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            h5utils.h5tovts.h5tovts(
+                h5utils.h5tovts.h5tovts_parse_args([h5file, *extra_args])
+            )
+        result = {}
+        for ext, reader in (
+            ("vts", vtk.vtkXMLStructuredGridReader()),
+            ("vti", vtk.vtkXMLImageDataReader()),
+        ):
+            reader.SetFileName(os.path.splitext(h5file)[0] + "." + ext)
+            reader.Update()
+            grid = reader.GetOutput()
+            pd = grid.GetPointData()
+            arrays = {
+                pd.GetArrayName(i): pd.GetArray(i).GetNumberOfTuples()
+                for i in range(pd.GetNumberOfArrays())
+            }
+            result[ext] = (grid.GetNumberOfPoints(), arrays)
+        return out.getvalue(), result
+
+    def test_mismatching_shapes_skipped(self):
+        """The first dataset defines the grid. Datasets of a different shape are skipped
+        with a message instead of producing truncated or invalid VTK files."""
+        cases = {
+            # name: ({dataset: shape}, expected points, expected datasets, skipped dataset)
+            "2D_first": ({"a_2d": (4, 4), "b_3d": (4, 4, 3)}, 16, ["a_2d"], "b_3d"),
+            "3D_first": ({"a_3d": (4, 4, 3), "b_2d": (4, 4)}, 48, ["a_3d"], "b_2d"),
+            "both_3D": ({"a": (4, 4, 3), "b": (5, 4, 3)}, 48, ["a"], "b"),
+        }
+        for case, (datasets, npoints, expected, skipped) in cases.items():
+            with self.subTest(case), tempfile.TemporaryDirectory() as tmpdir:
+                h5file = os.path.join(tmpdir, "mixed.h5")
+                with h5py.File(h5file, "w") as f:
+                    for name, shape in datasets.items():
+                        f.create_dataset(name, data=numpy.zeros(shape))
+                stdout, result = self._convert_and_read(h5file)
+                self.assertIn(f"Skipping {skipped}", stdout)
+                for ext in ("vts", "vti"):
+                    self.assertEqual(
+                        result[ext], (npoints, dict.fromkeys(expected, npoints))
+                    )
+
+    def test_2D_and_single_layer_3D_compatible(self):
+        """A 2D dataset (Nx, Ny) and a 3D dataset (Nx, Ny, 1) describe the same grid."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            h5file = os.path.join(tmpdir, "compatible.h5")
+            with h5py.File(h5file, "w") as f:
+                f.create_dataset("a_2d", data=numpy.zeros((4, 3)))
+                f.create_dataset("b_3d", data=numpy.zeros((4, 3, 1)))
+            stdout, result = self._convert_and_read(h5file)
+            self.assertNotIn("Skipping", stdout)
+            for ext in ("vts", "vti"):
+                self.assertEqual(result[ext], (12, {"a_2d": 12, "b_3d": 12}))
+
+    def test_requested_mismatching_shapes_raise(self):
+        """Explicitly requested datasets with different shapes are an error."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            h5file = os.path.join(tmpdir, "requested.h5")
+            with h5py.File(h5file, "w") as f:
+                f.create_dataset("a_2d", data=numpy.zeros((4, 4)))
+                f.create_dataset("b_3d", data=numpy.zeros((4, 4, 3)))
+            args = h5utils.h5tovts.h5tovts_parse_args([h5file, "-d", "a_2d", "b_3d"])
+            with self.assertRaisesRegex(ValueError, "b_3d.*does not match"):
+                h5utils.h5tovts.h5tovts(args)
 
     def test_listing(self):
         print("Testing h5tovts listing:")

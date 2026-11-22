@@ -256,6 +256,21 @@ def h5_readString(dataset):
     return str(value).strip("\0").strip()
 
 
+def h5_gridShape(shape):
+    """Return the 3D grid shape (Nx, Ny, Nz) corresponding to a dataset shape.
+
+    2D data (Nx, Ny) is handled as a 3D grid with a single layer along z,
+    i.e. (Nx, Ny, 1).
+    """
+    if len(shape) == 3:
+        return tuple(shape)
+    if len(shape) == 2:
+        return (shape[0], shape[1], 1)
+    raise Exception(
+        f"Data of dimension {len(shape)}. Only 2D and 3D data supported at the moment."
+    )
+
+
 def h5_setupLattice(HDF5_file_object, total_lattice_size=None, requested_dataset=[]):
     # get description
     description = None
@@ -279,17 +294,33 @@ def h5_setupLattice(HDF5_file_object, total_lattice_size=None, requested_dataset
     # set up data, Nx, Ny, Nz
     # TODO: Might cause conflict with size read from x/y/z mesh values... Add warnings?
     print(f"Using dataset = {selected_dataset} to determine dimensions.")
-    data = HDF5_file_object[selected_dataset]
-    if len(data.shape) == 3:
-        Nx, Ny, Nz = data.shape
-    elif len(data.shape) == 2:
-        # 2D data is handled as a 3D grid with a single layer along z, i.e. shape (Nx, Ny, 1).
-        Nx, Ny = data.shape
-        Nz = 1
-    else:
-        raise Exception(
-            f"Data of dimension {len(data.shape)}. Only 2D and 3D data supported at the moment."
-        )
+    grid_shape = h5_gridShape(HDF5_file_object[selected_dataset].shape)
+    Nx, Ny, Nz = grid_shape
+
+    # All datasets are put on the same grid, so they must have the same shape.
+    # Explicitly requested datasets that do not match are an error.
+    # Other (automatically selected) mismatching datasets are skipped, as
+    # adding them would give a corrupt VTK file (VTK truncates or rejects arrays
+    # whose length differs from the number of grid points).
+    if requested_dataset:
+        for name in requested_dataset:
+            shape = HDF5_file_object[name].shape
+            if h5_gridShape(shape) != grid_shape:
+                raise ValueError(
+                    f"Dataset {name} has shape {shape}, which does not match the grid "
+                    f"shape {grid_shape} determined by {selected_dataset}."
+                )
+    compatible_dataset_list = []
+    for name in complete_dataset_list:
+        shape = HDF5_file_object[name].shape
+        if h5_gridShape(shape) == grid_shape:
+            compatible_dataset_list.append(name)
+        else:
+            print(
+                f"Skipping {name}: shape {shape} does not match the grid shape "
+                f"{grid_shape} determined by {selected_dataset}."
+            )
+    complete_dataset_list = compatible_dataset_list
 
     # set up lattice
     mylattice = Lattice()
