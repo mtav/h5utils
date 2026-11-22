@@ -156,7 +156,8 @@ class test_h5tovts(unittest.TestCase):
 
     def test_MPB_2D_field_with_bloch_wavevector(self):
         """Regression: MPB 2D field files (e.g. tri-rods-e.k11.b01.z.tm.h5) contain a
-        'Bloch wavevector' dataset of shape (3,) which was used to determine the grid size."""
+        'Bloch wavevector' dataset of shape (3,) which was used to determine the grid size.
+        """
         N = 8
         zr = numpy.arange(N * N, dtype="f8").reshape(N, N)
         with tempfile.TemporaryDirectory() as tmpdir:

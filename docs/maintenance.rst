@@ -81,6 +81,11 @@ Running tests, linting and code formatting
         ruff check
         pylint ./h5utils/
 
+        # formatting with black:
+        black .
+        # check only:
+        black --check .
+
 pytest
 ------
 .. code:: bash
